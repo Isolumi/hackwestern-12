@@ -1,17 +1,5 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import ModelPage from './pages/ModelPage'
+import MotionPage from './pages/MotionPage';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <ModelPage/>
-    </>
-  )
+export default function App() {
+  return <MotionPage />;
 }
-
-export default App
