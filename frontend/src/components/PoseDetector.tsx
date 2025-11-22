@@ -2,53 +2,71 @@
 import React, { useEffect, useRef } from "react";
 import { MediaPipe } from "../lib/mediapipe/MediaPipe";
 import { DrawingUtils, PoseLandmarker } from "@mediapipe/tasks-vision";
+import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
-export default function PoseDetector() {
+// determinePose function
+export function determinePose(landmarks: NormalizedLandmark[][]): string {
+    if (!landmarks || landmarks.length === 0) return "-";
+
+    const pose = landmarks[0];
+
+    const nose = pose[0];
+    const leftWrist = pose[15];
+    const rightWrist = pose[16];
+    const leftShoulder = pose[11];
+    const rightShoulder = pose[12];
+
+    // "O" gesture
+    const handsAboveHead = leftWrist.y < nose.y && rightWrist.y < nose.y;
+    const wristDistanceX = Math.abs(leftWrist.x - rightWrist.x);
+    const shoulderDistanceX = Math.abs(leftShoulder.x - rightShoulder.x);
+    if (handsAboveHead && wristDistanceX < shoulderDistanceX) return "O";
+
+    // "X" gesture
+    const wristsBelowNose = leftWrist.y > nose.y && rightWrist.y > nose.y;
+    const wristsCrossed = leftWrist.x - rightWrist.x < 0;
+    if (wristsBelowNose && wristsCrossed) return "X";
+
+    return "-";
+}
+
+type PoseDetectorProps = {
+    onPoseChange?: (symbol: string) => void;
+};
+
+export default function PoseDetector({ onPoseChange }: PoseDetectorProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const symbolRef = useRef<string>("-");
 
     useEffect(() => {
         let animationFrameId: number;
         let drawingUtils: DrawingUtils | null = null;
 
         async function init() {
-            console.log("[PoseDetector] Initializing MediaPipe...");
             let poseLandmarker: PoseLandmarker;
-
             try {
                 poseLandmarker = await MediaPipe.buildPoseLandmarker();
-                console.log("[PoseDetector] PoseLandmarker ready");
             } catch (err) {
-                console.error("[PoseDetector] Failed to initialize PoseLandmarker:", err);
+                console.error("Failed to initialize PoseLandmarker:", err);
                 return;
             }
 
-            if (!videoRef.current) {
-                console.error("[PoseDetector] Video element not found");
-                return;
-            }
+            if (!videoRef.current) return;
 
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 videoRef.current.srcObject = stream;
                 await videoRef.current.play();
-                console.log("[PoseDetector] Video playing, readyState:", videoRef.current.readyState);
             } catch (err) {
-                console.error("[PoseDetector] Camera access or play failed:", err);
+                console.error("Camera access or play failed:", err);
                 return;
             }
 
             const canvas = canvasRef.current;
-            if (!canvas) {
-                console.error("[PoseDetector] Canvas element not found");
-                return;
-            }
-
+            if (!canvas) return;
             const ctx = canvas.getContext("2d");
-            if (!ctx) {
-                console.error("[PoseDetector] Failed to get canvas context");
-                return;
-            }
+            if (!ctx) return;
 
             drawingUtils = new DrawingUtils(ctx);
 
@@ -59,18 +77,33 @@ export default function PoseDetector() {
                 }
 
                 try {
-                    const result = await poseLandmarker.detectForVideo(videoRef.current, performance.now());
+                    const result = await poseLandmarker.detectForVideo(
+                        videoRef.current,
+                        performance.now()
+                    );
 
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+                    // Draw landmarks only (no symbol)
                     result.landmarks?.forEach((landmark) => {
                         drawingUtils!.drawLandmarks(landmark, {
-                            radius: (data) => DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1),
+                            radius: (data) =>
+                                DrawingUtils.lerp(data.from!.z, -0.15, 0.1, 5, 1),
                         });
-                        drawingUtils!.drawConnectors(landmark, PoseLandmarker.POSE_CONNECTIONS);
+                        drawingUtils!.drawConnectors(
+                            landmark,
+                            PoseLandmarker.POSE_CONNECTIONS
+                        );
                     });
+
+                    // Determine pose and notify parent
+                    const symbol = determinePose(result.landmarks ?? []);
+                    if (symbolRef.current !== symbol) {
+                        symbolRef.current = symbol;
+                        if (onPoseChange) onPoseChange(symbol);
+                    }
                 } catch (err) {
-                    console.error("[PoseDetector] Detection error:", err);
+                    console.error("Detection error:", err);
                 }
 
                 animationFrameId = requestAnimationFrame(detectFrame);
@@ -82,19 +115,14 @@ export default function PoseDetector() {
         init();
 
         return () => {
-            console.log("[PoseDetector] Cleaning up...");
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
-
             const video = videoRef.current;
             if (video?.srcObject) {
-                (video.srcObject as MediaStream)
-                    .getTracks()
-                    .forEach((track) => track.stop());
+                (video.srcObject as MediaStream).getTracks().forEach((track) => track.stop());
                 video.srcObject = null;
-                console.log("[PoseDetector] Camera stopped");
             }
         };
-    }, []);
+    }, [onPoseChange]);
 
     return (
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
