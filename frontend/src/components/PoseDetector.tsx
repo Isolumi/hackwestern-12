@@ -1,15 +1,16 @@
 // src/components/PoseDetector.tsx
 import React, { useEffect, useRef } from "react";
-import { MediaPipe } from "../lib/mediapipe/MediaPipe";
+import { MediaPipe } from "../library/mediapipe/MediaPipe";
 import { DrawingUtils, PoseLandmarker } from "@mediapipe/tasks-vision";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 
-// determinePose function
+// -----------------------------
+// determinePose (existing)
+// -----------------------------
 export function determinePose(landmarks: NormalizedLandmark[][]): string {
     if (!landmarks || landmarks.length === 0) return "-";
 
     const pose = landmarks[0];
-
     const nose = pose[0];
     const leftWrist = pose[15];
     const rightWrist = pose[16];
@@ -30,14 +31,60 @@ export function determinePose(landmarks: NormalizedLandmark[][]): string {
     return "-";
 }
 
+export function determineMovement(
+    landmarks: NormalizedLandmark[][],
+): [number, number, number, number] {
+
+    const vector: [number, number, number, number] = [0, 0, 0, 0];
+
+    if (!landmarks || landmarks.length === 0) return vector;
+
+    const pose = landmarks[0];
+
+    // Nose tip
+    const noseX = pose[0].x;
+
+    const eyeRightX = pose[7].x;
+
+    const thresholdRotation = 0.02; // adjust for sensitivity
+    const diffNoseRight = noseX - eyeRightX;
+
+    if (Math.abs(diffNoseRight) < thresholdRotation) {
+        vector[3] = 1;
+    }
+
+    const eyeLeftX = pose[8].x;
+
+    const diffNoseLeft = noseX - eyeLeftX;
+
+    if (Math.abs(diffNoseLeft) < thresholdRotation) {
+        vector[3] = -1;
+    }
+
+
+    const leftWidth = Math.abs(pose[15].x - pose[11].x);
+    const rightWidth = Math.abs(pose[16].x - pose[12].x);
+    const torsoWidth = Math.abs(pose[11].x - pose[12].x);
+
+    if (leftWidth > torsoWidth) {
+        vector[0] = 1;
+    } else if (rightWidth > torsoWidth) {
+        vector[0] = -1;
+    }
+
+    return vector;
+}
+
 type PoseDetectorProps = {
     onPoseChange?: (symbol: string) => void;
+    onMovementChange?: (vec: [number, number, number, number]) => void; // NEW optional callback
 };
 
-export default function PoseDetector({ onPoseChange }: PoseDetectorProps) {
+export default function PoseDetector({ onPoseChange, onMovementChange }: PoseDetectorProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const symbolRef = useRef<string>("-");
+    const vectorRef = useRef<[number, number, number, number]>([0, 0, 0, 0]);
 
     useEffect(() => {
         let animationFrameId: number;
@@ -65,6 +112,7 @@ export default function PoseDetector({ onPoseChange }: PoseDetectorProps) {
 
             const canvas = canvasRef.current;
             if (!canvas) return;
+
             const ctx = canvas.getContext("2d");
             if (!ctx) return;
 
@@ -84,7 +132,7 @@ export default function PoseDetector({ onPoseChange }: PoseDetectorProps) {
 
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                    // Draw landmarks only (no symbol)
+                    // Draw landmarks
                     result.landmarks?.forEach((landmark) => {
                         drawingUtils!.drawLandmarks(landmark, {
                             radius: (data) =>
@@ -96,12 +144,20 @@ export default function PoseDetector({ onPoseChange }: PoseDetectorProps) {
                         );
                     });
 
-                    // Determine pose and notify parent
+                    // SYMBOL
                     const symbol = determinePose(result.landmarks ?? []);
                     if (symbolRef.current !== symbol) {
                         symbolRef.current = symbol;
-                        if (onPoseChange) onPoseChange(symbol);
+                        onPoseChange?.(symbol);
                     }
+
+                    // VECTOR
+                    const vector = determineMovement(result.landmarks ?? []);
+                    if (JSON.stringify(vectorRef.current) !== JSON.stringify(vector)) {
+                        vectorRef.current = vector;
+                        onMovementChange?.(vector);
+                    }
+
                 } catch (err) {
                     console.error("Detection error:", err);
                 }
@@ -122,7 +178,7 @@ export default function PoseDetector({ onPoseChange }: PoseDetectorProps) {
                 video.srcObject = null;
             }
         };
-    }, [onPoseChange]);
+    }, [onPoseChange, onMovementChange]);
 
     return (
         <div style={{ position: "relative", width: "100%", height: "100%" }}>

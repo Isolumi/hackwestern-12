@@ -6,16 +6,16 @@ import * as THREE from 'three';
 
 function Model() {
     const geometry = useLoader(PLYLoader, '/model.ply') as THREE.BufferGeometry;
-    
+
     const hasColors = geometry.hasAttribute('color');
-    
+
     const isPointCloud = !geometry.index;
-    
+
     // For meshes, compute normals if they don't exist (needed for lighting)
     if (!isPointCloud && !geometry.hasAttribute('normal')) {
         geometry.computeVertexNormals();
     }
-    
+
     if (isPointCloud) {
         return (
             <points geometry={geometry}>
