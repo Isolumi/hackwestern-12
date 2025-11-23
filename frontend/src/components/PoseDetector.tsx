@@ -21,12 +21,12 @@ export function determinePose(landmarks: NormalizedLandmark[][]): string {
     const handsAboveHead = leftWrist.y < nose.y && rightWrist.y < nose.y;
     const wristDistanceX = Math.abs(leftWrist.x - rightWrist.x);
     const shoulderDistanceX = Math.abs(leftShoulder.x - rightShoulder.x);
-    if (handsAboveHead && wristDistanceX < shoulderDistanceX) return "O";
+    if (handsAboveHead && wristDistanceX < shoulderDistanceX) return "X";
 
     // "X" gesture
     const wristsBelowNose = leftWrist.y > nose.y && rightWrist.y > nose.y;
     const wristsCrossed = leftWrist.x - rightWrist.x < 0;
-    if (wristsBelowNose && wristsCrossed) return "X";
+    if (wristsBelowNose && wristsCrossed) return "O";
 
     return "-";
 }
@@ -108,13 +108,13 @@ export function determineGrab(
 
     // used for determining if grabbing or not
     const yLeftHand = pose[20].y;
-    const yLeftElbow = pose[14].y;
+    const yNose = pose[0].y;
 
     vector[0] = rightHand.x;
     vector[1] = rightHand.y;
     vector[2] = rightHand.z;
 
-    if (yLeftHand > yLeftElbow) {
+    if (yLeftHand > yNose) {
         vector[3] = 0; // grabbing
     } else {
         vector[3] = 1; // not grabbing
