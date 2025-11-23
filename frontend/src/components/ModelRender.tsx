@@ -9,7 +9,8 @@ function Model() {
     const hasColors = geometry.hasAttribute('color');
 
     const isPointCloud = !geometry.index;
-    
+
+    // For meshes, compute normals if they don't exist (needed for lighting)
     if (!isPointCloud && !geometry.hasAttribute('normal')) {
         geometry.computeVertexNormals();
     }
