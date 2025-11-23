@@ -83,9 +83,15 @@ function CameraController({ movementVector }: CameraControllerProps) {
 interface ModelRenderProps {
     movementVector?: [number, number, number, number];
     models?: ModelData[];
+    pose?: string;
+    grab?: [number, number, number, number];
 }
 
-export default function ModelRender({ movementVector = [0, 0, 0, 0], models = [{ filepath: '/model.ply', position: [0, 0, 0] }] }: ModelRenderProps) {
+export default function ModelRender({ 
+        movementVector = [0, 0, 0, 0],
+        models = [{ filepath: '/model.ply', position: [0, 0, 0] }],
+        pose = "-",
+        grab = [0, 0, 0, 0] }: ModelRenderProps) {
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
             <Canvas

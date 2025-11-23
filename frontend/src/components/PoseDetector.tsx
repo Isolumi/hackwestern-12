@@ -89,19 +89,52 @@ export function determineMovement(
         vector[1] = -1; // move backward
     }
 
+
+    return vector;
+}
+
+export function determineGrab(
+    landmarks: NormalizedLandmark[][],
+): [number, number, number, number] {
+
+    const vector: [number, number, number, number] = [0, 0, 0, 0];
+
+    if (!landmarks || landmarks.length === 0) return vector;
+
+    const pose = landmarks[0];
+
+    // used for determining location of grab
+    const rightHand = pose[19];
+
+    // used for determining if grabbing or not
+    const yLeftHand = pose[20].y;
+    const yLeftElbow = pose[14].y;
+
+    vector[0] = rightHand.x;
+    vector[1] = rightHand.y;
+    vector[2] = rightHand.z;
+
+    if (yLeftHand > yLeftElbow) {
+        vector[3] = 0; // grabbing
+    } else {
+        vector[3] = 1; // not grabbing
+    }
+
     return vector;
 }
 
 type PoseDetectorProps = {
     onPoseChange?: (symbol: string) => void;
-    onMovementChange?: (vec: [number, number, number, number]) => void; // NEW optional callback
+    onMovementChange?: (vec: [number, number, number, number]) => void;
+    onGrabChange?: (vec: [number, number, number, number]) => void;
 };
 
-export default function PoseDetector({ onPoseChange, onMovementChange }: PoseDetectorProps) {
+export default function PoseDetector({ onPoseChange, onMovementChange, onGrabChange }: PoseDetectorProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const symbolRef = useRef<string>("-");
-    const vectorRef = useRef<[number, number, number, number]>([0, 0, 0, 0]);
+    const movementVectorRef = useRef<[number, number, number, number]>([0, 0, 0, 0]);
+    const grabVectorRef = useRef<[number, number, number, number]>([0, 0, 0, 0]);
 
     useEffect(() => {
         let animationFrameId: number;
@@ -168,11 +201,18 @@ export default function PoseDetector({ onPoseChange, onMovementChange }: PoseDet
                         onPoseChange?.(symbol);
                     }
 
-                    // VECTOR
-                    const vector = determineMovement(result.landmarks ?? []);
-                    if (JSON.stringify(vectorRef.current) !== JSON.stringify(vector)) {
-                        vectorRef.current = vector;
-                        onMovementChange?.(vector);
+                    // MOVEMENT VECTOR
+                    const movementVector = determineMovement(result.landmarks ?? []);
+                    if (JSON.stringify(movementVectorRef.current) !== JSON.stringify(movementVector)) {
+                        movementVectorRef.current = movementVector;
+                        onMovementChange?.(movementVector);
+                    }
+
+                    // GRAB VECTOR
+                    const grabVector = determineGrab(result.landmarks ?? []);
+                    if (JSON.stringify(grabVectorRef.current) !== JSON.stringify(grabVector)) {
+                        grabVectorRef.current = grabVector;
+                        onMovementChange?.(grabVector);
                     }
 
                 } catch (err) {
@@ -195,7 +235,7 @@ export default function PoseDetector({ onPoseChange, onMovementChange }: PoseDet
                 video.srcObject = null;
             }
         };
-    }, [onPoseChange, onMovementChange]);
+    }, [onPoseChange, onMovementChange, onGrabChange]);
 
     return (
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
