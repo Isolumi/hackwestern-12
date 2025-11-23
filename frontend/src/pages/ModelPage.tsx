@@ -8,7 +8,8 @@ export default function ModelPage() {
     const [grab, setGrab] = useState<number[]>([0, 0, 0, 0]);
 
     const [models, setModels] = useState<{ filepath: string, position: [number, number, number] }[]>([
-        { filepath: '/splat.ply', position: [0, 0, 0] }
+        { filepath: '/HackWesternHorseNewNew.ply', position: [0, 0, 0] },
+        { filepath: '/splat.ply', position: [1, 0, 0] },
     ]);
 
     return (
