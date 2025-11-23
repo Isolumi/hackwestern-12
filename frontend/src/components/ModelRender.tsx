@@ -30,6 +30,7 @@ export interface ModelData {
     position: [number, number, number];
     scale?: number;
     rotationY?: number;
+    color?: string | number;
     isEnvironment?: boolean;
 }
 
@@ -38,9 +39,10 @@ interface ModelProps {
     position?: [number, number, number];
     scale?: number;
     rotationY?: number;
+    color?: string | number;
 }
 
-const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0], scale = 1, rotationY = 0 }, ref) => {
+const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0], scale = 1, rotationY = 0, color }, ref) => {
     const geometry = useLoader(PLYLoader, filepath) as THREE.BufferGeometry;
 
     const hasColors = geometry.hasAttribute('color');
@@ -57,7 +59,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
             <points geometry={geometry} position={position} scale={[scale, scale, scale]} rotation={[0, rotationY, 0]} ref={ref as any}>
                 <pointsMaterial
                     size={CONFIG.MODEL.POINT_SIZE}
-                    color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
+                    color={hasColors ? undefined : (color || CONFIG.MODEL.DEFAULT_COLOR)}
                     vertexColors={hasColors}
                 />
             </points>
@@ -66,7 +68,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
         return (
             <mesh geometry={geometry} position={position} scale={[scale, scale, scale]} rotation={[0, rotationY, 0]} ref={ref as any}>
                 <meshStandardMaterial
-                    color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
+                    color={hasColors ? undefined : (color || CONFIG.MODEL.DEFAULT_COLOR)}
                     vertexColors={hasColors}
                     flatShading={false}
                 />
@@ -216,6 +218,7 @@ export default function ModelRender({
                             position={model.position}
                             scale={model.scale}
                             rotationY={model.rotationY}
+                            color={model.color}
                             ref={(el) => { modelRefs.current[index] = el; }}
                         />
                     ))}
