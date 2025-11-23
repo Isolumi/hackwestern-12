@@ -34,7 +34,7 @@ export interface ModelData {
     isEnvironment?: boolean;
 }
 
-interface ModelProps {
+export interface ModelProps {
     filepath: string;
     position?: [number, number, number];
     scale?: number;
@@ -42,7 +42,7 @@ interface ModelProps {
     color?: string | number;
 }
 
-const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0], scale = 1, rotationY = 0, color }, ref) => {
+export const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0], scale = 1, rotationY = 0, color }, ref) => {
     const geometry = useLoader(PLYLoader, filepath) as THREE.BufferGeometry;
 
     const hasColors = geometry.hasAttribute('color');
