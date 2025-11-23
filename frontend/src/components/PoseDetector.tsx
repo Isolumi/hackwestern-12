@@ -212,7 +212,7 @@ export default function PoseDetector({ onPoseChange, onMovementChange, onGrabCha
                     const grabVector = determineGrab(result.landmarks ?? []);
                     if (JSON.stringify(grabVectorRef.current) !== JSON.stringify(grabVector)) {
                         grabVectorRef.current = grabVector;
-                        onMovementChange?.(grabVector);
+                        onGrabChange?.(grabVector);
                     }
 
                 } catch (err) {
@@ -241,7 +241,7 @@ export default function PoseDetector({ onPoseChange, onMovementChange, onGrabCha
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
             <video
                 ref={videoRef}
-                style={{ position: "absolute", top: 0, left: 0 }}
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
                 width={640}
                 height={480}
                 muted
@@ -250,7 +250,7 @@ export default function PoseDetector({ onPoseChange, onMovementChange, onGrabCha
                 ref={canvasRef}
                 width={640}
                 height={480}
-                style={{ position: "absolute", top: 0, left: 0 }}
+                style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "cover" }}
             />
         </div>
     );
