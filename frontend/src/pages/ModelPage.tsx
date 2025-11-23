@@ -7,11 +7,15 @@ export default function ModelPage() {
     const [pose, setPose] = useState<string>("-");
     const [grab, setGrab] = useState<number[]>([0, 0, 0, 0]);
 
+    const [models, setModels] = useState<{ filepath: string, position: [number, number, number] }[]>([
+        { filepath: '/splat.ply', position: [0, 0, 0] }
+    ]);
+
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
             <ModelRender 
                 movementVector={movementVector} 
-                models={[{ filepath: '/model.ply', position: [0, 0, 0] }]}
+                models={models}
                 pose={pose}
                 grab={grab as [number, number, number, number]}
             />
