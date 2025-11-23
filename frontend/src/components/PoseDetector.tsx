@@ -72,6 +72,23 @@ export function determineMovement(
         vector[0] = -1;
     }
 
+    // for moving back and forth
+    const yThreshold = 0.1;
+    const leftWrist = pose[15];
+    const rightWrist = pose[16];
+    const leftElbow = pose[13];
+    const rightElbow = pose[14];
+    const leftShoulder = pose[11];
+    const rightShoulder = pose[12];
+
+    if ((Math.abs(leftWrist.y - leftElbow.y) < yThreshold && Math.abs(leftWrist.x - leftElbow.x) < yThreshold) &&
+        (Math.abs(rightWrist.y - rightElbow.y) < yThreshold && Math.abs(rightWrist.x - rightElbow.x) < yThreshold)) {
+        vector[1] = 1; // move forward
+    } else if ((Math.abs(leftElbow.y - leftShoulder.y) < yThreshold && Math.abs(leftElbow.x - leftShoulder.x) < yThreshold) &&
+        (Math.abs(rightElbow.y - rightShoulder.y) < yThreshold && Math.abs(rightElbow.x - rightShoulder.x) < yThreshold)) {
+        vector[1] = -1; // move backward
+    }
+
     return vector;
 }
 
