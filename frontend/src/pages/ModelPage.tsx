@@ -7,8 +7,10 @@ export default function ModelPage() {
     const [pose, setPose] = useState<string>("-");
     const [grab, setGrab] = useState<number[]>([0, 0, 0, 0]);
 
-    const [models, setModels] = useState<{ filepath: string, position: [number, number, number] }[]>([
-        { filepath: '/splat.ply', position: [0, 0, 0] }
+    const [models, setModels] = useState<{ filepath: string, position: [number, number, number], isEnvironment?: boolean }[]>([
+        { filepath: '/HackWesternHorseNewNew.ply', position: [0, 0, 0], isEnvironment: true },
+        { filepath: '/splat.ply', position: [1, 0, 0] },
+        { filepath: '/moose.ply', position: [-1, 0, 0] },
     ]);
 
     return (

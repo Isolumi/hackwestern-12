@@ -11,14 +11,14 @@ const CONFIG = {
     CONTROLS: {
         MOVEMENT_SPEED: 0.05,
         ROTATION_SPEED: 0.03,
-        GRAB_THRESHOLD: 10.0,
+        GRAB_THRESHOLD: 1.0,
     },
     SPHERE: {
-        X_SCALE: -1.5,
+        X_SCALE: -2.5,
         X_OFFSET: 1,
-        Y_SCALE: -1.5,
+        Y_SCALE: -2.5,
         Y_OFFSET: 0.5,
-        Z_SCALE: 1.5,
+        Z_SCALE: 3,
     },
     CAMERA: {
         INITIAL_POSITION: [0, 0, 0] as [number, number, number],
@@ -28,6 +28,7 @@ const CONFIG = {
 export interface ModelData {
     filepath: string;
     position: [number, number, number];
+    isEnvironment?: boolean;
 }
 
 interface ModelProps {
@@ -77,9 +78,10 @@ interface SceneControllerProps {
     onModeChange: (mode: string) => void;
     onDebugInfo: (info: string) => void;
     modelRefs: React.MutableRefObject<(THREE.Object3D | null)[]>;
+    models: ModelData[];
 }
 
-function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo, modelRefs }: SceneControllerProps) {
+function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo, modelRefs, models }: SceneControllerProps) {
     const { camera } = useThree();
     const [mode, setMode] = useState<'CAMERA' | 'OBJECT'>('CAMERA');
     const canToggle = useRef(true);
@@ -135,8 +137,8 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
                     let closestModel: THREE.Object3D | null = null;
                     let minDistance = Infinity;
 
-                    modelRefs.current.forEach(model => {
-                        if (model) {
+                    modelRefs.current.forEach((model, index) => {
+                        if (model && !models[index]?.isEnvironment) {
                             const distance = model.position.distanceTo(sphereRef.current!.position);
                             if (distance < minDistance) {
                                 minDistance = distance;
@@ -192,7 +194,7 @@ export default function ModelRender({
                 camera={{ far: 100000, position: [0, 5, 5] }}
             >
                 <Suspense fallback={null}>
-                    <SceneController movementVector={movementVector} pose={pose} grab={grab} onModeChange={setDebugMode} onDebugInfo={setDebugInfo} modelRefs={modelRefs} />
+                    <SceneController movementVector={movementVector} pose={pose} grab={grab} onModeChange={setDebugMode} onDebugInfo={setDebugInfo} modelRefs={modelRefs} models={models} />
                     <ambientLight intensity={0.3} />
                     <directionalLight position={[500, 500, 500]} intensity={2} castShadow />
                     {models.map((model, index) => (
