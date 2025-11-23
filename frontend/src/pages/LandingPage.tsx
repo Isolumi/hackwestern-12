@@ -11,20 +11,20 @@ export default function LandingPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const navigate = useNavigate();
-  
+
   // Theme options
   const themeOptions = [
     { word: 'Create', color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }, // Purple
     { word: 'Relive', color: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)' }, // Blue
     { word: 'Change', color: 'linear-gradient(135deg, #fc54a5ff 0%, #ff6a00 100%)' }  // Orange/Pink
   ];
-  
+
   // State for cycling through themes
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
   const [isBouncing, setIsBouncing] = useState(false);
   const actionWord = themeOptions[currentThemeIndex].word;
   const backgroundColor = themeOptions[currentThemeIndex].color;
-  
+
   // Auto-cycle through themes every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
@@ -34,10 +34,10 @@ export default function LandingPage() {
         setTimeout(() => setIsBouncing(false), 600);
       }, 0);
     }, 5000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   // Generate random stars
   const stars = useMemo(() => {
     return Array.from({ length: 50 }, (_, i) => ({
@@ -49,17 +49,17 @@ export default function LandingPage() {
       size: Math.random() > 0.5 ? 2 : 1
     }));
   }, []);
-  
+
   const handleClick = () => {
-    // Only proceed if there's a prompt or files
-    if (!prompt.trim() && selectedFiles.length === 0) {
-      return;
-    }
-    
+    // // Only proceed if there's a prompt or files
+    // if (!prompt.trim() && selectedFiles.length === 0) {
+    //   return;
+    // }
+
     setIsExpanding(true);
     // Wait for animation to complete before navigating
     setTimeout(() => {
-      navigate('/viewer', { state: { backgroundColor, images: imagePreviews, prompt } });
+      navigate('/generate', { state: { backgroundColor, images: imagePreviews, prompt } });
     }, 800);
   };
 
@@ -69,7 +69,7 @@ export default function LandingPage() {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setSelectedFiles(prev => [...prev, ...files]);
-      
+
       // Create preview URLs for images
       const newPreviews: string[] = [];
       files.forEach((file) => {
@@ -408,7 +408,7 @@ export default function LandingPage() {
           }
         }
       `}</style>
-      <div 
+      <div
         className={`landing-container ${isExpanding ? 'expanding' : ''}`}
       >
         {/* Background layers for smooth crossfade */}
@@ -442,14 +442,21 @@ export default function LandingPage() {
         <div className="landing-content">
           <h1 className={`landing-title ${isBouncing ? 'bouncing' : ''}`}>
             {actionWord}
-            <img 
-              src={actionWord === 'Change' ? boxSvg : actionWord === 'Relive' ? wavySvg : curveSvg} 
-              alt="" 
-              className="title-curve" 
+            <img
+              src={actionWord === 'Change' ? boxSvg : actionWord === 'Relive' ? wavySvg : curveSvg}
+              alt=""
+              className="title-curve"
             />
           </h1>
           <h2>your world today</h2>
-          <div className="prompt-box">
+          <button
+            className="submit-button"
+            onClick={handleClick}
+          // disabled={isButtonDisabled}
+          >
+            Create your world
+          </button>
+          {/* <div className="prompt-box">
             <textarea
               className="prompt-textarea"
               placeholder="Write your prompt"
@@ -511,7 +518,7 @@ export default function LandingPage() {
                 Create your world
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </>

@@ -23,6 +23,6 @@ DEMO OF PROJECT
 
 
 While we have been able to achieve a lot of what we set out to do, and overcame a lot of hurdles, we still have many features that we could not fully implement due to various reasons. 
-These features include connecting the engine to VR for an even more immersive experience, and potentially even sensored gloves for haptic feedback when interacting with objects.
+These features include customizing objects with skins/colors schemes, connecting the engine to VR for an even more immersive experience, and potentially even sensored gloves for haptic feedback when interacting with objects.
 
 None the less, we have accomplished our goal: to enable people to generate their world, only limited by their imagination. With CREATE.world, anyone can build 3D models effortlessly, and bring their world to life.
