@@ -46,7 +46,7 @@ export function determineMovement(
 
     const eyeRightX = pose[7].x;
 
-    const thresholdRotation = 0.02; // adjust for sensitivity
+    const thresholdRotation = 0.04; // adjust for sensitivity
     const diffNoseRight = noseX - eyeRightX;
 
     if (Math.abs(diffNoseRight) < thresholdRotation) {
