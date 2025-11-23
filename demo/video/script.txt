@@ -1,0 +1,28 @@
+Have you ever wanted to relive a wholesome moment?
+
+Are you curious how certain events would play out?
+
+DO YOU WANT TO MEET LEBRON?
+
+
+With CREATE.world, you can build any world that you can imagine.
+From a cozy memory you want to step back into, to a completely unreal universe where you set the rules. 
+Show it, or even describe it, and watch it come to life in a fully explorable 3D world.
+
+CREATE.world is a react app that leverages a variety of AI models for turning your imagination into a 3D world.
+By integrating leading generative models such as MASt3R-SLAM for world generation, as well as Meta's latest SAM 3D for object generation, 
+you can seamlessly build and add any elements to your world.
+
+Further bridging the gap between your imagination and reality, we have added an additional layer on top of SAM 3D to generate object models from a decription. 
+This layer uses Nano-banana from Google Gemini to transform your text into an image, which is then fed into SAM 3D.
+
+To make this experience feel more immersive, you are able to explore your world through physical gestures, and even interact with objects to move them through space. 
+
+
+DEMO OF PROJECT
+
+
+While we have been able to achieve a lot of what we set out to do, and overcame a lot of hurdles, we still have many features that we could not fully implement due to various reasons. 
+These features include connecting the engine to VR for an even more immersive experience, and potentially even sensored gloves for haptic feedback when interacting with objects.
+
+None the less, we have accomplished our goal: to enable people to generate their world, only limited by their imagination. With CREATE.world, anyone can build 3D models effortlessly, and bring their world to life.
