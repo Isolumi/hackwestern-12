@@ -43,8 +43,8 @@ interface CameraControllerProps {
 
 function CameraController({ movementVector }: CameraControllerProps) {
     const { camera } = useThree();
-    const MOVEMENT_SPEED = 5;
-    const ROTATION_SPEED = 0.05;
+    const MOVEMENT_SPEED = 3;
+    const ROTATION_SPEED = 0.03;
 
     useEffect(() => {
 <<<<<<< HEAD
@@ -61,8 +61,7 @@ function CameraController({ movementVector }: CameraControllerProps) {
         // Relative movement (local space)
         // x=1 means Left, so we move negative on local X (Right is positive)
         camera.translateX(-x * MOVEMENT_SPEED);
-        camera.translateY(y * MOVEMENT_SPEED);
-        camera.translateZ(z * MOVEMENT_SPEED);
+        camera.translateZ(y * MOVEMENT_SPEED);
 
         // Rotation (y-axis only)
         // -1 is left (positive rotation), 1 is right (negative rotation)
