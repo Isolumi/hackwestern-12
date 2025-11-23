@@ -57,7 +57,7 @@ function CameraController({ movementVector }: CameraControllerProps) {
         // Relative movement (local space)
         // x=1 means Left, so we move negative on local X (Right is positive)
         camera.translateX(-x * MOVEMENT_SPEED);
-        camera.translateZ(y * MOVEMENT_SPEED);
+        camera.translateZ(-y * MOVEMENT_SPEED);
 
         // Rotation (y-axis only)
         // -1 is left (positive rotation), 1 is right (negative rotation)
