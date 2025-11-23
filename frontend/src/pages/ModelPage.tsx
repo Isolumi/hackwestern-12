@@ -4,7 +4,7 @@ export default function ModelPage() {
 
     return (
         <div>
-            <ModelRender />
+            <ModelRender movementVector={[0, 0, 0, 0]} />
         </div>
     );
 }
