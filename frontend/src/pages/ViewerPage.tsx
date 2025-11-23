@@ -9,13 +9,20 @@ export default function ViewerPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
+  const [hiddenImageIndices, setHiddenImageIndices] = useState<Set<number>>(new Set());
   const location = useLocation();
   
-  // Get images from navigation state (if passed from landing page)
+  // Get images, prompt, and backgroundColor from navigation state (if passed from landing page)
   const initialImages = location.state?.images || [];
+  const initialPromptFromNav = location.state?.prompt || '';
+  const backgroundColor = location.state?.backgroundColor || 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)';
   
-  // Combine initial images with uploaded images
-  const allImages = [...initialImages, ...uploadedImages];
+  // Editable prompt state
+  const [currentPrompt, setCurrentPrompt] = useState(initialPromptFromNav);
+  
+  // Combine initial images with uploaded images, then filter out hidden ones
+  const allImagesRaw = [...initialImages, ...uploadedImages];
+  const allImages = allImagesRaw.filter((_, index) => !hiddenImageIndices.has(index));
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -55,26 +62,39 @@ export default function ViewerPage() {
     processFiles(Array.from(e.dataTransfer.files));
   };
 
-  const removeImage = (index: number) => {
-    if (index < initialImages.length) {
-      // Can't remove initial images, only uploaded ones
-      return;
+  const removeImage = (indexInFiltered: number) => {
+    // Find the actual index in allImagesRaw based on the filtered index
+    let count = 0;
+    let actualIndex = -1;
+    for (let i = 0; i < allImagesRaw.length; i++) {
+      if (!hiddenImageIndices.has(i)) {
+        if (count === indexInFiltered) {
+          actualIndex = i;
+          break;
+        }
+        count++;
+      }
     }
-    const uploadedIndex = index - initialImages.length;
-    setUploadedImages(prev => prev.filter((_, i) => i !== uploadedIndex));
+    
+    if (actualIndex !== -1) {
+      setHiddenImageIndices(prev => new Set([...prev, actualIndex]));
+    }
   };
 
   const handleSave = () => {
-    // Trigger model update with newly uploaded images
+    // Trigger model update with prompt and images
+    console.log('Rendering model with prompt:', currentPrompt);
+    console.log('All images:', allImages);
+    
+    // Reset loading to simulate model update
+    setIsLoading(true);
+    setLoadingProgress(0);
+    
+    // TODO: Add actual model update logic here with currentPrompt and allImages
     if (uploadedImages.length > 0) {
-      console.log('Saving and updating model with images:', allImages);
-      // Reset loading to simulate model update
-      setIsLoading(true);
-      setLoadingProgress(0);
-      // TODO: Add actual model update logic here
-      alert(`Updating model with ${uploadedImages.length} new image${uploadedImages.length > 1 ? 's' : ''}!`);
+      alert(`Rendering model with updated prompt and ${uploadedImages.length} new image${uploadedImages.length > 1 ? 's' : ''}!`);
     } else {
-      alert('No new images to save. Upload images first.');
+      alert('Rendering model with updated prompt!');
     }
   };
 
@@ -109,7 +129,6 @@ export default function ViewerPage() {
           min-height: 100vh;
           display: flex;
           flex-direction: column;
-          background-color: #1a1a1a;
         }
         
         .viewer-content {
@@ -160,7 +179,8 @@ export default function ViewerPage() {
         
         .fullscreen-button:hover {
           background-color: rgba(134, 245, 255, 0.2);
-          transform: scale(1.05);
+          border: 2px solid #86F5FF;
+          transform: none;
         }
         
         .info-button {
@@ -182,7 +202,8 @@ export default function ViewerPage() {
         
         .info-button:hover {
           background-color: rgba(134, 245, 255, 0.2);
-          transform: scale(1.05);
+          border: 2px solid #86F5FF;
+          transform: none;
         }
         
         .info-popup-container {
@@ -500,7 +521,7 @@ export default function ViewerPage() {
         }
       `}</style>
       
-      <div className="viewer-container">
+      <div className="viewer-container" style={{ background: backgroundColor }}>
         <div className="viewer-content">
           <div className="sidebar">
             {/* Loading/Rendering Status */}
@@ -522,9 +543,37 @@ export default function ViewerPage() {
               </div>
             )}
 
+            {/* Prompt Editor */}
+            {currentPrompt && (
+              <div className="sidebar-section">
+                <h2 className="sidebar-title">Prompt</h2>
+                <textarea
+                  value={currentPrompt}
+                  onChange={(e) => setCurrentPrompt(e.target.value)}
+                  placeholder="Enter your prompt..."
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'rgba(134, 245, 255, 0.1)',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    color: '#e5e5e5',
+                    fontSize: '0.875rem',
+                    lineHeight: '1.5',
+                    border: '1px solid rgba(134, 245, 255, 0.2)',
+                    resize: 'none',
+                    height: '110px',
+                    fontFamily: 'inherit',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    overflowY: 'auto'
+                  }}
+                />
+              </div>
+            )}
+
             {/* Upload Section */}
             <div className="sidebar-section">
-              <h2 className="sidebar-title">Reference Images</h2>
+              <h2 className="sidebar-title">Upload Images</h2>
               
               {/* Drag and Drop Zone */}
               <div
@@ -574,15 +623,13 @@ export default function ViewerPage() {
                         alt={`Reference ${index + 1}`}
                         className="gallery-image"
                       />
-                      {index >= initialImages.length && (
-                        <button
-                          className="image-delete-btn"
-                          onClick={() => removeImage(index)}
-                          aria-label="Remove image"
-                        >
-                          ×
-                        </button>
-                      )}
+                      <button
+                        className="image-delete-btn"
+                        onClick={() => removeImage(index)}
+                        aria-label="Remove image"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
                   </div>
@@ -632,21 +679,21 @@ export default function ViewerPage() {
                   <div className="info-steps">
                     <div className="info-step">
                       <div className="info-step-icon">📸</div>
-                      <h4 className="info-step-title">1. Upload Images</h4>
+                      <h4 className="info-step-title">Direction Change</h4>
                       <p className="info-step-description">
-                        Drag and drop reference images or click to browse
+                        Move your head left and right to change directions
                       </p>
                     </div>
                     <div className="info-step">
                       <div className="info-step-icon">✨</div>
-                      <h4 className="info-step-title">2. Render Model</h4>
+                      <h4 className="info-step-title">Render Model</h4>
                       <p className="info-step-description">
                         Click save to generate your 3D model from images
                       </p>
                     </div>
                     <div className="info-step">
                       <div className="info-step-icon">🎮</div>
-                      <h4 className="info-step-title">3. Explore</h4>
+                      <h4 className="info-step-title">Explore</h4>
                       <p className="info-step-description">
                         View and interact with your generated 3D scene
                       </p>
@@ -657,9 +704,7 @@ export default function ViewerPage() {
             )}
             
             <div className="checkered-placeholder">
-              <div className="placeholder-text">
-                3D Content Will Render Here
-              </div>
+              
             </div>
           </div>
         </div>
