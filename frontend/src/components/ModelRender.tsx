@@ -3,8 +3,18 @@ import { Canvas, useLoader, useFrame, useThree } from '@react-three/fiber';
 import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 import * as THREE from 'three';
 
-function Model() {
-    const geometry = useLoader(PLYLoader, '/model.ply') as THREE.BufferGeometry;
+export interface ModelData {
+    filepath: string;
+    position: [number, number, number];
+}
+
+interface ModelProps {
+    filepath: string;
+    position?: [number, number, number];
+}
+
+function Model({ filepath, position = [0, 0, 0] }: ModelProps) {
+    const geometry = useLoader(PLYLoader, filepath) as THREE.BufferGeometry;
 
     const hasColors = geometry.hasAttribute('color');
 
@@ -17,7 +27,7 @@ function Model() {
 
     if (isPointCloud) {
         return (
-            <points geometry={geometry}>
+            <points geometry={geometry} position={position}>
                 <pointsMaterial
                     size={0.01}
                     color={hasColors ? undefined : 0xffffff}
@@ -27,7 +37,7 @@ function Model() {
         );
     } else {
         return (
-            <mesh geometry={geometry}>
+            <mesh geometry={geometry} position={position}>
                 <meshStandardMaterial
                     color={hasColors ? undefined : 0xffffff}
                     vertexColors={hasColors}
@@ -44,11 +54,11 @@ interface CameraControllerProps {
 
 function CameraController({ movementVector }: CameraControllerProps) {
     const { camera } = useThree();
-    const MOVEMENT_SPEED = 3;
+    const MOVEMENT_SPEED = 0.1;
     const ROTATION_SPEED = 0.03;
 
     useEffect(() => {
-        camera.position.set(0, 100, 0);
+        camera.position.set(0, 0, 0);
         camera.rotation.set(0, 0, 0);
     }, [camera]);
 
@@ -72,20 +82,23 @@ function CameraController({ movementVector }: CameraControllerProps) {
 
 interface ModelRenderProps {
     movementVector?: [number, number, number, number];
+    models?: ModelData[];
 }
 
-export default function ModelRender({ movementVector = [0, 0, 0, 0] }: ModelRenderProps) {
+export default function ModelRender({ movementVector = [0, 0, 0, 0], models = [{ filepath: '/model.ply', position: [0, 0, 0] }] }: ModelRenderProps) {
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
             <Canvas
                 gl={{ alpha: true }}
-                camera={{ far: 100000, position: [0, 0, 0] }}
+                camera={{ far: 100000, position: [0, 5, 5] }}
             >
                 <Suspense fallback={null}>
                     <CameraController movementVector={movementVector} />
                     <ambientLight intensity={0.3} />
                     <directionalLight position={[500, 500, 500]} intensity={2} castShadow />
-                    <Model />
+                    {models.map((model, index) => (
+                        <Model key={index} filepath={model.filepath} position={model.position} />
+                    ))}
                 </Suspense>
             </Canvas>
         </div>

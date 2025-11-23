@@ -7,7 +7,9 @@ export default function ModelPage() {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-            <ModelRender movementVector={movementVector} />
+            <ModelRender movementVector={movementVector} models={[
+                { filepath: '/splat.ply', position: [0, 0, 0] }
+            ]} />
             <div style={{ 
                 position: 'absolute', 
                 bottom: 20, 
