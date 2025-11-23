@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { Canvas, useLoader, useFrame, useThree } from '@react-three/fiber';
 import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 import * as THREE from 'three';
@@ -48,13 +48,24 @@ function Model({ filepath, position = [0, 0, 0] }: ModelProps) {
     }
 }
 
-interface CameraControllerProps {
+interface SceneControllerProps {
     movementVector: [number, number, number, number];
+    pose: string;
+    grab: [number, number, number, number];
+    onModeChange: (mode: string) => void;
 }
 
-function CameraController({ movementVector }: CameraControllerProps) {
+function SceneController({ movementVector, pose, grab, onModeChange }: SceneControllerProps) {
     const { camera } = useThree();
-    const MOVEMENT_SPEED = 0.1;
+    const [mode, setMode] = useState<'CAMERA' | 'OBJECT'>('CAMERA');
+    const canToggle = useRef(true);
+    const sphereRef = useRef<THREE.Mesh>(null);
+
+    useEffect(() => {
+        onModeChange(mode);
+    }, [mode, onModeChange]);
+
+    const MOVEMENT_SPEED = 3;
     const ROTATION_SPEED = 0.03;
 
     useEffect(() => {
@@ -63,21 +74,46 @@ function CameraController({ movementVector }: CameraControllerProps) {
     }, [camera]);
 
     useFrame(() => {
-        const [x, y, z, t] = movementVector;
+        // Mode Switching Logic
+        if (pose === "O") {
+            if (canToggle.current) {
+                setMode(prev => prev === 'CAMERA' ? 'OBJECT' : 'CAMERA');
+                canToggle.current = false;
+            }
+        } else if (pose === "-") {
+            canToggle.current = true;
+        }
 
-        // Relative movement (local space)
-        // x=1 means Left, so we move negative on local X (Right is positive)
-        camera.translateX(-x * MOVEMENT_SPEED);
-        camera.translateZ(-y * MOVEMENT_SPEED);
+        if (mode === 'CAMERA') {
+            const [x, y, z, t] = movementVector;
 
-        // Rotation (y-axis only)
-        // -1 is left (positive rotation), 1 is right (negative rotation)
-        camera.rotation.y += t * ROTATION_SPEED;
-        camera.rotation.x = 0;
-        camera.rotation.z = 0;
+            camera.translateX(-x * MOVEMENT_SPEED);
+            camera.translateZ(-y * MOVEMENT_SPEED);
+            camera.rotation.y += t * ROTATION_SPEED;
+            camera.rotation.x = 0;
+            camera.rotation.z = 0;
+        } else {
+            // Object Logic
+            if (sphereRef.current) {
+                const [gx, gy, gz] = grab;
+                // Position relative to camera (local space)
+                const offset = new THREE.Vector3(gx, gy, gz);
+                offset.applyEuler(camera.rotation);
+                sphereRef.current.position.copy(camera.position).add(offset);
+            }
+        }
     });
 
-    return null;
+    return (
+        <>
+            {mode === 'OBJECT' && (
+                <mesh ref={sphereRef}>
+                    <sphereGeometry args={[0.1, 32, 32]} />
+                    <meshStandardMaterial color="red" />
+                </mesh>
+            )}
+        </>
+    );
 }
 
 interface ModelRenderProps {
@@ -92,6 +128,8 @@ export default function ModelRender({
         models = [{ filepath: '/model.ply', position: [0, 0, 0] }],
         pose = "-",
         grab = [0, 0, 0, 0] }: ModelRenderProps) {
+    const [debugMode, setDebugMode] = useState("CAMERA");
+
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
             <Canvas
@@ -99,7 +137,7 @@ export default function ModelRender({
                 camera={{ far: 100000, position: [0, 5, 5] }}
             >
                 <Suspense fallback={null}>
-                    <CameraController movementVector={movementVector} />
+                    <SceneController movementVector={movementVector} pose={pose} grab={grab} onModeChange={setDebugMode} />
                     <ambientLight intensity={0.3} />
                     <directionalLight position={[500, 500, 500]} intensity={2} castShadow />
                     {models.map((model, index) => (
@@ -107,6 +145,19 @@ export default function ModelRender({
                     ))}
                 </Suspense>
             </Canvas>
+            <div style={{
+                position: 'absolute',
+                bottom: '20px',
+                left: '20px',
+                color: 'white',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                pointerEvents: 'none',
+                textShadow: '1px 1px 2px black',
+                zIndex: 100
+            }}>
+                MODE: {debugMode}
+            </div>
         </div>
     );
 }

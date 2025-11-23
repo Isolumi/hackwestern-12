@@ -212,7 +212,7 @@ export default function PoseDetector({ onPoseChange, onMovementChange, onGrabCha
                     const grabVector = determineGrab(result.landmarks ?? []);
                     if (JSON.stringify(grabVectorRef.current) !== JSON.stringify(grabVector)) {
                         grabVectorRef.current = grabVector;
-                        onMovementChange?.(grabVector);
+                        onGrabChange?.(grabVector);
                     }
 
                 } catch (err) {

@@ -9,9 +9,12 @@ export default function ModelPage() {
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-            <ModelRender movementVector={movementVector} models={[
-                { filepath: '/model.ply', position: [0, 0, 0] }
-            ]} />
+            <ModelRender 
+                movementVector={movementVector} 
+                models={[{ filepath: '/model.ply', position: [0, 0, 0] }]}
+                pose={pose}
+                grab={grab as [number, number, number, number]}
+            />
             <div style={{ 
                 position: 'absolute', 
                 bottom: 20, 
