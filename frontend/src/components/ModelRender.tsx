@@ -97,7 +97,7 @@ function SceneController({ movementVector, pose, grab, onModeChange }: SceneCont
             if (sphereRef.current) {
                 const [gx, gy, gz] = grab;
                 // Position relative to camera (local space)
-                const offset = new THREE.Vector3(gx, gy, gz);
+                const offset = new THREE.Vector3((-1.5)*gx+1, (-1.5)*gy+0.5, (1.5)*gz);
                 offset.applyEuler(camera.rotation);
                 sphereRef.current.position.copy(camera.position).add(offset);
             }
