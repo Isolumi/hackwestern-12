@@ -28,6 +28,7 @@ const CONFIG = {
 export interface ModelData {
     filepath: string;
     position: [number, number, number];
+    isEnvironment?: boolean;
 }
 
 interface ModelProps {
@@ -77,9 +78,10 @@ interface SceneControllerProps {
     onModeChange: (mode: string) => void;
     onDebugInfo: (info: string) => void;
     modelRefs: React.MutableRefObject<(THREE.Object3D | null)[]>;
+    models: ModelData[];
 }
 
-function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo, modelRefs }: SceneControllerProps) {
+function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo, modelRefs, models }: SceneControllerProps) {
     const { camera } = useThree();
     const [mode, setMode] = useState<'CAMERA' | 'OBJECT'>('CAMERA');
     const canToggle = useRef(true);
@@ -135,8 +137,8 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
                     let closestModel: THREE.Object3D | null = null;
                     let minDistance = Infinity;
 
-                    modelRefs.current.forEach(model => {
-                        if (model) {
+                    modelRefs.current.forEach((model, index) => {
+                        if (model && !models[index]?.isEnvironment) {
                             const distance = model.position.distanceTo(sphereRef.current!.position);
                             if (distance < minDistance) {
                                 minDistance = distance;
@@ -192,7 +194,7 @@ export default function ModelRender({
                 camera={{ far: 100000, position: [0, 5, 5] }}
             >
                 <Suspense fallback={null}>
-                    <SceneController movementVector={movementVector} pose={pose} grab={grab} onModeChange={setDebugMode} onDebugInfo={setDebugInfo} modelRefs={modelRefs} />
+                    <SceneController movementVector={movementVector} pose={pose} grab={grab} onModeChange={setDebugMode} onDebugInfo={setDebugInfo} modelRefs={modelRefs} models={models} />
                     <ambientLight intensity={0.3} />
                     <directionalLight position={[500, 500, 500]} intensity={2} castShadow />
                     {models.map((model, index) => (
