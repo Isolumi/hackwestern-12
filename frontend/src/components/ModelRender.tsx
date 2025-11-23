@@ -29,6 +29,7 @@ export interface ModelData {
     filepath: string;
     position: [number, number, number];
     scale?: number;
+    rotationY?: number;
     isEnvironment?: boolean;
 }
 
@@ -36,9 +37,10 @@ interface ModelProps {
     filepath: string;
     position?: [number, number, number];
     scale?: number;
+    rotationY?: number;
 }
 
-const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0], scale = 1 }, ref) => {
+const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0], scale = 1, rotationY = 0 }, ref) => {
     const geometry = useLoader(PLYLoader, filepath) as THREE.BufferGeometry;
 
     const hasColors = geometry.hasAttribute('color');
@@ -52,7 +54,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
 
     if (isPointCloud) {
         return (
-            <points geometry={geometry} position={position} scale={[scale, scale, scale]} ref={ref as any}>
+            <points geometry={geometry} position={position} scale={[scale, scale, scale]} rotation={[0, rotationY, 0]} ref={ref as any}>
                 <pointsMaterial
                     size={CONFIG.MODEL.POINT_SIZE}
                     color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
@@ -62,7 +64,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
         );
     } else {
         return (
-            <mesh geometry={geometry} position={position} scale={[scale, scale, scale]} ref={ref as any}>
+            <mesh geometry={geometry} position={position} scale={[scale, scale, scale]} rotation={[0, rotationY, 0]} ref={ref as any}>
                 <meshStandardMaterial
                     color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
                     vertexColors={hasColors}
@@ -213,6 +215,7 @@ export default function ModelRender({
                             filepath={model.filepath}
                             position={model.position}
                             scale={model.scale}
+                            rotationY={model.rotationY}
                             ref={(el) => { modelRefs.current[index] = el; }}
                         />
                     ))}

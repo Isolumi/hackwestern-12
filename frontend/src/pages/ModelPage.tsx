@@ -9,8 +9,8 @@ export default function ModelPage() {
 
     const [models, setModels] = useState<ModelData[]>([
         { filepath: '/worlds/Myhal.ply', position: [0, 0, -2], isEnvironment: true, scale: 3 },
-        { filepath: '/objects/UofTHacksMoose.ply', position: [1, 0, -1], scale: 1 },
-        { filepath: '/objects/HackWesternHorse.ply', position: [-1, 0, -1], scale: 1 },
+        { filepath: '/objects/UofTHacksMoose.ply', position: [1, 0, -1], scale: 1, rotationY: 0 },
+        { filepath: '/objects/HackWesternHorse.ply', position: [-1, 0, -1], scale: 1, rotationY: 0 },
     ]);
 
     return (
