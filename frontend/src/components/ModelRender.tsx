@@ -47,11 +47,7 @@ function CameraController({ movementVector }: CameraControllerProps) {
     const ROTATION_SPEED = 0.03;
 
     useEffect(() => {
-<<<<<<< HEAD
         camera.position.set(0, 100, 0);
-=======
-        camera.position.set(0, 0, 0);
->>>>>>> 4b7973c (also movement)
         camera.rotation.set(0, 0, 0);
     }, [camera]);
 
