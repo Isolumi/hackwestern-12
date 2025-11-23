@@ -54,16 +54,15 @@ function CameraController({ movementVector }: CameraControllerProps) {
     useFrame(() => {
         const [x, y, z, t] = movementVector;
 
-        // Global movement
-        camera.position.x -= x * MOVEMENT_SPEED;
-        camera.position.y += y * MOVEMENT_SPEED;
-        camera.position.z += z * MOVEMENT_SPEED;
+        // Relative movement (local space)
+        // x=1 means Left, so we move negative on local X (Right is positive)
+        camera.translateX(-x * MOVEMENT_SPEED);
+        camera.translateY(y * MOVEMENT_SPEED);
+        camera.translateZ(z * MOVEMENT_SPEED);
 
         // Rotation (y-axis only)
         // -1 is left (positive rotation), 1 is right (negative rotation)
         camera.rotation.y += t * ROTATION_SPEED;
-        
-        // Ensure no other rotation
         camera.rotation.x = 0;
         camera.rotation.z = 0;
     });
