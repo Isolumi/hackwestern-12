@@ -3,6 +3,28 @@ import { Canvas, useLoader, useFrame, useThree } from '@react-three/fiber';
 import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
 import * as THREE from 'three';
 
+const CONFIG = {
+    MODEL: {
+        POINT_SIZE: 0.01,
+        DEFAULT_COLOR: 0xffffff,
+    },
+    CONTROLS: {
+        MOVEMENT_SPEED: 0.05,
+        ROTATION_SPEED: 0.03,
+        GRAB_THRESHOLD: 10.0,
+    },
+    SPHERE: {
+        X_SCALE: -1.5,
+        X_OFFSET: 1,
+        Y_SCALE: -1.5,
+        Y_OFFSET: 0.5,
+        Z_SCALE: 1.5,
+    },
+    CAMERA: {
+        INITIAL_POSITION: [0, 0, 0] as [number, number, number],
+    }
+};
+
 export interface ModelData {
     filepath: string;
     position: [number, number, number];
@@ -29,8 +51,8 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
         return (
             <points geometry={geometry} position={position} ref={ref as any}>
                 <pointsMaterial
-                    size={0.01}
-                    color={hasColors ? undefined : 0xffffff}
+                    size={CONFIG.MODEL.POINT_SIZE}
+                    color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
                     vertexColors={hasColors}
                 />
             </points>
@@ -39,7 +61,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
         return (
             <mesh geometry={geometry} position={position} ref={ref as any}>
                 <meshStandardMaterial
-                    color={hasColors ? undefined : 0xffffff}
+                    color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
                     vertexColors={hasColors}
                     flatShading={false}
                 />
@@ -67,11 +89,12 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
         onModeChange(mode);
     }, [mode, onModeChange]);
 
-    const MOVEMENT_SPEED = 0.05;
-    const ROTATION_SPEED = 0.03;
+    useEffect(() => {
+        onModeChange(mode);
+    }, [mode, onModeChange]);
 
     useEffect(() => {
-        camera.position.set(0, 0, 0);
+        camera.position.set(...CONFIG.CAMERA.INITIAL_POSITION);
         camera.rotation.set(0, 0, 0);
     }, [camera]);
 
@@ -89,9 +112,9 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
         if (mode === 'CAMERA') {
             const [x, y, z, t] = movementVector;
 
-            camera.translateX(-x * MOVEMENT_SPEED);
-            camera.translateZ(-y * MOVEMENT_SPEED);
-            camera.rotation.y += t * ROTATION_SPEED;
+            camera.translateX(-x * CONFIG.CONTROLS.MOVEMENT_SPEED);
+            camera.translateZ(-y * CONFIG.CONTROLS.MOVEMENT_SPEED);
+            camera.rotation.y += t * CONFIG.CONTROLS.ROTATION_SPEED;
             camera.rotation.x = 0;
             camera.rotation.z = 0;
         } else {
@@ -99,7 +122,11 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
             if (sphereRef.current) {
                 const [gx, gy, gz] = grab;
                 // Position relative to camera (local space)
-                const offset = new THREE.Vector3((-1.5)*gx+1, (-1.5)*gy+0.5, (1.5)*gz);
+                const offset = new THREE.Vector3(
+                    CONFIG.SPHERE.X_SCALE * gx + CONFIG.SPHERE.X_OFFSET,
+                    CONFIG.SPHERE.Y_SCALE * gy + CONFIG.SPHERE.Y_OFFSET,
+                    CONFIG.SPHERE.Z_SCALE * gz
+                );
                 offset.applyEuler(camera.rotation);
                 sphereRef.current.position.copy(camera.position).add(offset);
 
@@ -107,7 +134,6 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
                 if (grab[3] === 1) {
                     let closestModel: THREE.Object3D | null = null;
                     let minDistance = Infinity;
-                    const GRAB_THRESHOLD = 10.0; // Adjust based on scene scale
 
                     modelRefs.current.forEach(model => {
                         if (model) {
@@ -119,7 +145,7 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
                         }
                     });
 
-                    if (closestModel && minDistance < GRAB_THRESHOLD) {
+                    if (closestModel && minDistance < CONFIG.CONTROLS.GRAB_THRESHOLD) {
                         (closestModel as THREE.Object3D).position.copy(sphereRef.current.position);
                     }
                     
