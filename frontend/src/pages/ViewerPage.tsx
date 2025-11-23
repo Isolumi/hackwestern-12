@@ -314,6 +314,7 @@ export default function ViewerPage() {
           display: flex;
           flex-direction: column;
           gap: 0.75rem;
+          padding-bottom: 1.5rem;
         }
         
         .control-button {

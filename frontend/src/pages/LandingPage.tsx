@@ -1,6 +1,7 @@
 import { Paperclip } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import curveSvg from '../assets/curve.svg';
 
 export default function LandingPage() {
   const [prompt, setPrompt] = useState('');
@@ -13,11 +14,23 @@ export default function LandingPage() {
   const { actionWord, backgroundColor } = useMemo(() => {
     const options = [
       { word: 'Create', color: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }, // Purple
-      { word: 'Revive', color: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)' }, // Blue
+      { word: 'Relive', color: 'linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%)' }, // Blue
       { word: 'Change', color: 'linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)' }  // Orange/Pink
     ];
     const selected = options[Math.floor(Math.random() * options.length)];
     return { actionWord: selected.word, backgroundColor: selected.color };
+  }, []);
+  
+  // Generate random stars
+  const stars = useMemo(() => {
+    return Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      duration: `${2 + Math.random() * 3}s`,
+      delay: `${Math.random() * 3}s`,
+      size: Math.random() > 0.5 ? 2 : 1
+    }));
   }, []);
   
   const handleClick = () => {
@@ -78,6 +91,39 @@ export default function LandingPage() {
           justify-content: center;
           padding: 1rem;
           box-sizing: border-box;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .stars {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 0;
+        }
+        
+        .star {
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: white;
+          border-radius: 50%;
+          animation: twinkle var(--duration) ease-in-out infinite;
+          opacity: 0;
+        }
+        
+        @keyframes twinkle {
+          0%, 100% {
+            opacity: 0;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.5);
+          }
         }
         
         .landing-content {
@@ -86,6 +132,8 @@ export default function LandingPage() {
           align-items: center;
           gap: 0;
           width: 100%;
+          position: relative;
+          z-index: 1;
         }
         
         .landing-title {
@@ -95,6 +143,16 @@ export default function LandingPage() {
           text-align: center;
           padding: 0 1rem;
           letter-spacing: -0.05em;
+          position: relative;
+        }
+        
+        .title-curve {
+          position: absolute;
+          bottom: -10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 100%;
+          height: auto;
         }
         
         .prompt-box {
@@ -297,9 +355,26 @@ export default function LandingPage() {
         className={`landing-container ${isExpanding ? 'expanding' : ''}`}
         style={{ background: backgroundColor }}
       >
+        <div className="stars">
+          {stars.map((star) => (
+            <div
+              key={star.id}
+              className="star"
+              style={{
+                left: star.left,
+                top: star.top,
+                width: `${star.size}px`,
+                height: `${star.size}px`,
+                '--duration': star.duration,
+                animationDelay: star.delay
+              } as React.CSSProperties & { '--duration': string }}
+            />
+          ))}
+        </div>
         <div className="landing-content">
           <h1 className="landing-title">
             {actionWord}
+            <img src={curveSvg} alt="" className="title-curve" />
           </h1>
           <h2>your world today</h2>
           <div className="prompt-box">
