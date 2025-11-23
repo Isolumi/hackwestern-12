@@ -5,15 +5,15 @@ import * as THREE from 'three';
 
 function Model() {
     const geometry = useLoader(PLYLoader, '/model.ply') as THREE.BufferGeometry;
-    
+
     const hasColors = geometry.hasAttribute('color');
-    
+
     const isPointCloud = !geometry.index;
     
     if (!isPointCloud && !geometry.hasAttribute('normal')) {
         geometry.computeVertexNormals();
     }
-    
+
     if (isPointCloud) {
         return (
             <points geometry={geometry}>
