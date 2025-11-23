@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ModelRender from "../components/ModelRender";
+import ModelRender, { type ModelData } from "../components/ModelRender";
 import PoseDetector from "../components/PoseDetector";
 
 export default function ModelPage() {
@@ -7,10 +7,10 @@ export default function ModelPage() {
     const [pose, setPose] = useState<string>("-");
     const [grab, setGrab] = useState<number[]>([0, 0, 0, 0]);
 
-    const [models, setModels] = useState<{ filepath: string, position: [number, number, number], isEnvironment?: boolean }[]>([
+    const [models, setModels] = useState<ModelData[]>([
         { filepath: '/HackWesternHorseNewNew.ply', position: [0, 0, 0], isEnvironment: true },
-        { filepath: '/splat.ply', position: [1, 0, 0] },
-        { filepath: '/moose.ply', position: [-1, 0, 0] },
+        { filepath: '/splat.ply', position: [1, 0, 0], scale: 1 },
+        { filepath: '/moose.ply', position: [-1, 0, 0], scale: 1 },
     ]);
 
     return (

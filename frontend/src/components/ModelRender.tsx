@@ -28,15 +28,17 @@ const CONFIG = {
 export interface ModelData {
     filepath: string;
     position: [number, number, number];
+    scale?: number;
     isEnvironment?: boolean;
 }
 
 interface ModelProps {
     filepath: string;
     position?: [number, number, number];
+    scale?: number;
 }
 
-const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0] }, ref) => {
+const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0, 0, 0], scale = 1 }, ref) => {
     const geometry = useLoader(PLYLoader, filepath) as THREE.BufferGeometry;
 
     const hasColors = geometry.hasAttribute('color');
@@ -50,7 +52,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
     
     if (isPointCloud) {
         return (
-            <points geometry={geometry} position={position} ref={ref as any}>
+            <points geometry={geometry} position={position} scale={[scale, scale, scale]} ref={ref as any}>
                 <pointsMaterial
                     size={CONFIG.MODEL.POINT_SIZE}
                     color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
@@ -60,7 +62,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
         );
     } else {
         return (
-            <mesh geometry={geometry} position={position} ref={ref as any}>
+            <mesh geometry={geometry} position={position} scale={[scale, scale, scale]} ref={ref as any}>
                 <meshStandardMaterial
                     color={hasColors ? undefined : CONFIG.MODEL.DEFAULT_COLOR}
                     vertexColors={hasColors}
@@ -180,7 +182,7 @@ interface ModelRenderProps {
 
 export default function ModelRender({ 
         movementVector = [0, 0, 0, 0],
-        models = [{ filepath: '/model.ply', position: [0, 0, 0] }],
+        models = [{ filepath: '/model.ply', position: [0, 0, 0], scale: 1 }],
         pose = "-",
         grab = [0, 0, 0, 0] }: ModelRenderProps) {
     const [debugMode, setDebugMode] = useState("CAMERA");
@@ -202,6 +204,7 @@ export default function ModelRender({
                             key={index} 
                             filepath={model.filepath} 
                             position={model.position} 
+                            scale={model.scale}
                             ref={(el) => { modelRefs.current[index] = el; }}
                         />
                     ))}
