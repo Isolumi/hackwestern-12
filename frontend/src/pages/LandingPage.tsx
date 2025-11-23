@@ -247,32 +247,80 @@ export default function LandingPage() {
         }
         
         .submit-button {
-          padding: 0.875rem 2rem;
-          border-radius: 8px;
-          background: #86F5FF;
-          color: black;
+          padding: 0.8rem 2.2rem;
+          border-radius: 50px;
+          background: linear-gradient(45deg, #00d2ff, #3a7bd5);
+          color: white;
           border: none;
           outline: none;
           cursor: pointer;
           font-size: 1rem;
-          font-weight: 500;
+          font-weight: 700;
           white-space: nowrap;
-          transition: background 0.2s ease;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          z-index: 10;
         }
         
         .submit-button:hover {
-          background: #5FE3F0;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 25px rgba(0, 210, 255, 0.6);
+        }
+        
+        /* Sparkle/Shine effect */
+        .submit-button::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255, 255, 255, 0.6),
+            transparent
+          );
+          transition: none;
+          animation: shine 3s infinite linear;
+        }
+        
+        @keyframes shine {
+          0% {
+            left: -100%;
+          }
+          20% {
+            left: 100%;
+          }
+          100% {
+            left: 100%;
+          }
+        }
+
+        .submit-button:active {
+          transform: translateY(1px);
+          box-shadow: 0 2px 10px rgba(0, 210, 255, 0.3);
         }
         
         .submit-button:disabled {
-          background: #86F5FF;
-          color: #6b7280;
+          background: #9ca3af;
+          color: #d1d5db;
           cursor: not-allowed;
-          opacity: 0.3;
+          box-shadow: none;
+          transform: none;
+          animation: none;
+        }
+        
+        .submit-button:disabled::before {
+          display: none;
         }
         
         .submit-button:disabled:hover {
-          background: #86F5FF;
+          background: #9ca3af;
         }
         
         .landing-container.expanding {
