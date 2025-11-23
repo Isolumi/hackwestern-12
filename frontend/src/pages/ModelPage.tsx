@@ -10,6 +10,7 @@ export default function ModelPage() {
     const [models, setModels] = useState<{ filepath: string, position: [number, number, number], isEnvironment?: boolean }[]>([
         { filepath: '/HackWesternHorseNewNew.ply', position: [0, 0, 0], isEnvironment: true },
         { filepath: '/splat.ply', position: [1, 0, 0] },
+        { filepath: '/moose.ply', position: [-1, 0, 0] },
     ]);
 
     return (

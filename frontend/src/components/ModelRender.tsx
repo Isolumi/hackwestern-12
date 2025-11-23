@@ -11,14 +11,14 @@ const CONFIG = {
     CONTROLS: {
         MOVEMENT_SPEED: 0.05,
         ROTATION_SPEED: 0.03,
-        GRAB_THRESHOLD: 10.0,
+        GRAB_THRESHOLD: 1.0,
     },
     SPHERE: {
-        X_SCALE: -1.5,
+        X_SCALE: -2.5,
         X_OFFSET: 1,
-        Y_SCALE: -1.5,
+        Y_SCALE: -2.5,
         Y_OFFSET: 0.5,
-        Z_SCALE: 1.5,
+        Z_SCALE: 3,
     },
     CAMERA: {
         INITIAL_POSITION: [0, 0, 0] as [number, number, number],
