@@ -8,31 +8,31 @@ export default function ModelPage() {
     const [grab, setGrab] = useState<number[]>([0, 0, 0, 0]);
 
     const [models, setModels] = useState<ModelData[]>([
-        { filepath: '/HackWesternHorseNewNew.ply', position: [0, 0, 0], isEnvironment: true },
-        { filepath: '/splat.ply', position: [1, 0, 0], scale: 1 },
-        { filepath: '/moose.ply', position: [-1, 0, 0], scale: 1 },
+        { filepath: '/worlds/Myhal.ply', position: [0, 0, -2], isEnvironment: true, scale: 3 },
+        { filepath: '/objects/UofTHacksMoose.ply', position: [1, 0, -1], scale: 1 },
+        { filepath: '/objects/HackWesternHorse.ply', position: [-1, 0, -1], scale: 1 },
     ]);
 
     return (
         <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-            <ModelRender 
-                movementVector={movementVector} 
+            <ModelRender
+                movementVector={movementVector}
                 models={models}
                 pose={pose}
                 grab={grab as [number, number, number, number]}
             />
-            <div style={{ 
-                position: 'absolute', 
-                bottom: 20, 
-                right: 20, 
-                width: '320px', 
-                height: '240px', 
-                border: '2px solid white', 
-                borderRadius: '8px', 
+            <div style={{
+                position: 'absolute',
+                bottom: 20,
+                right: 20,
+                width: '320px',
+                height: '240px',
+                border: '2px solid white',
+                borderRadius: '8px',
                 overflow: 'hidden',
-                zIndex: 10 
+                zIndex: 10
             }}>
-                <PoseDetector onMovementChange={setMovementVector} onPoseChange={setPose} onGrabChange={setGrab}/>
+                <PoseDetector onMovementChange={setMovementVector} onPoseChange={setPose} onGrabChange={setGrab} />
             </div>
         </div>
     );

@@ -49,7 +49,7 @@ const Model = forwardRef<THREE.Object3D, ModelProps>(({ filepath, position = [0,
     if (!isPointCloud && !geometry.hasAttribute('normal')) {
         geometry.computeVertexNormals();
     }
-    
+
     if (isPointCloud) {
         return (
             <points geometry={geometry} position={position} scale={[scale, scale, scale]} ref={ref as any}>
@@ -106,7 +106,12 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
         // Mode Switching Logic
         if (pose === "O") {
             if (canToggle.current) {
-                setMode(prev => prev === 'CAMERA' ? 'OBJECT' : 'CAMERA');
+                setMode('CAMERA');
+                canToggle.current = false;
+            }
+        } else if (pose === "X") {
+            if (canToggle.current) {
+                setMode('OBJECT');
                 canToggle.current = false;
             }
         } else if (pose === "-") {
@@ -152,11 +157,14 @@ function SceneController({ movementVector, pose, grab, onModeChange, onDebugInfo
                     if (closestModel && minDistance < CONFIG.CONTROLS.GRAB_THRESHOLD) {
                         (closestModel as THREE.Object3D).position.copy(sphereRef.current.position);
                     }
-                    
+
                     onDebugInfo(`Grab: ${grab[3]}, Dist: ${minDistance.toFixed(2)}, Models: ${modelRefs.current.length}`);
                 } else {
-                     onDebugInfo(`Grab: ${grab[3]} (No Stick)`);
+                    onDebugInfo(`Grab: ${grab[3]} (No Stick)`);
                 }
+
+                const [x, y, z, t] = movementVector;
+                camera.rotation.y += t * CONFIG.CONTROLS.ROTATION_SPEED;
             }
         }
     });
@@ -180,11 +188,11 @@ interface ModelRenderProps {
     grab?: [number, number, number, number];
 }
 
-export default function ModelRender({ 
-        movementVector = [0, 0, 0, 0],
-        models = [{ filepath: '/model.ply', position: [0, 0, 0], scale: 1 }],
-        pose = "-",
-        grab = [0, 0, 0, 0] }: ModelRenderProps) {
+export default function ModelRender({
+    movementVector = [0, 0, 0, 0],
+    models = [{ filepath: '/model.ply', position: [0, 0, 0], scale: 1 }],
+    pose = "-",
+    grab = [0, 0, 0, 0] }: ModelRenderProps) {
     const [debugMode, setDebugMode] = useState("CAMERA");
     const [debugInfo, setDebugInfo] = useState("");
     const modelRefs = useRef<(THREE.Object3D | null)[]>([]);
@@ -200,10 +208,10 @@ export default function ModelRender({
                     <ambientLight intensity={0.3} />
                     <directionalLight position={[500, 500, 500]} intensity={2} castShadow />
                     {models.map((model, index) => (
-                        <Model 
-                            key={index} 
-                            filepath={model.filepath} 
-                            position={model.position} 
+                        <Model
+                            key={index}
+                            filepath={model.filepath}
+                            position={model.position}
                             scale={model.scale}
                             ref={(el) => { modelRefs.current[index] = el; }}
                         />
@@ -221,7 +229,7 @@ export default function ModelRender({
                 textShadow: '1px 1px 2px black',
                 zIndex: 100
             }}>
-                MODE: {debugMode} <br/>
+                MODE: {debugMode} <br />
                 {debugInfo}
             </div>
         </div>
