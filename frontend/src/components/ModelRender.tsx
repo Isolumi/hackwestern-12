@@ -47,7 +47,7 @@ function CameraController({ movementVector }: CameraControllerProps) {
     const ROTATION_SPEED = 0.05;
 
     useEffect(() => {
-        camera.position.set(0, 0, 0);
+        camera.position.set(0, 100, 0);
         camera.rotation.set(0, 0, 0);
     }, [camera]);
 
@@ -55,13 +55,13 @@ function CameraController({ movementVector }: CameraControllerProps) {
         const [x, y, z, t] = movementVector;
 
         // Global movement
-        camera.position.x += x * MOVEMENT_SPEED;
+        camera.position.x -= x * MOVEMENT_SPEED;
         camera.position.y += y * MOVEMENT_SPEED;
         camera.position.z += z * MOVEMENT_SPEED;
 
         // Rotation (y-axis only)
         // -1 is left (positive rotation), 1 is right (negative rotation)
-        camera.rotation.y -= t * ROTATION_SPEED;
+        camera.rotation.y += t * ROTATION_SPEED;
         
         // Ensure no other rotation
         camera.rotation.x = 0;
